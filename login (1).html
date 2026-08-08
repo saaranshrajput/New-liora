@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign in — Liora</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ============ BASE THEME (provided) ============ */
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background: #021216;
+        color: #9aa6ae;
+        min-height: 100vh;
+      }
+
+      h1,
+      h2 {
+        text-align: center;
+        color: #00ffaa;
+        text-shadow:
+          0 0 8px #00ffaa55,
+          0 0 14px #00ccff44;
+      }
+
+      /* HEADER */
+      header {
+        background: #0b0f12;
+        padding: 26px 40px;
+        text-align: center;
+      }
+
+      .brand {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-weight: 800;
+        letter-spacing: 3px;
+        font-size: 38px;
+        color: #00ffc8;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+      }
+
+      .sun-wrap {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        position: relative;
+      }
+
+      /* soft blurred halo behind the orb, like a lens glow */
+      .sun-wrap::before {
+        content: "";
+        position: absolute;
+        inset: -20px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 222, 89, 0.55) 0%,
+          rgba(255, 136, 0, 0.22) 45%,
+          transparent 72%
+        );
+        filter: blur(4px);
+        z-index: 0;
+        animation: haloPulse 2.4s ease-in-out infinite;
+      }
+
+      .sun-orb {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          #fff6d6 0%,
+          #ffde59 45%,
+          #ff8800 100%
+        );
+        animation: orbPulse 2.4s ease-in-out infinite;
+      }
+
+      @keyframes haloPulse {
+        0%,
+        100% {
+          opacity: 0.75;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.12);
+        }
+      }
+
+      @keyframes orbPulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 12px #ffde59,
+            0 0 22px #ff8800;
+        }
+        50% {
+          box-shadow:
+            0 0 20px #ffde59,
+            0 0 34px #ff8800;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .brand {
+          font-size: 28px;
+          letter-spacing: 2px;
+        }
+        .sun-wrap {
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      /* ============ LOGIN LAYOUT ============ */
+      .auth-shell {
+        min-height: calc(100vh - 96px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px 60px;
+      }
+
+      .auth-card {
+        width: 100%;
+        max-width: 420px;
+        background: #0b0f12;
+        border: 1px solid #00ccff33;
+        border-radius: 14px;
+        box-shadow:
+          0 0 10px #00ccff22,
+          0 20px 60px rgba(0, 0, 0, 0.45);
+        padding: 36px 34px 30px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .auth-card::before {
+        content: "";
+        position: absolute;
+        top: -60%;
+        left: -20%;
+        width: 140%;
+        height: 140%;
+        background: radial-gradient(
+          circle at 30% 0%,
+          rgba(0, 255, 170, 0.06),
+          transparent 55%
+        );
+        pointer-events: none;
+      }
+
+      .auth-card h1 {
+        font-size: 22px;
+        margin: 0 0 6px;
+        letter-spacing: 0.5px;
+      }
+
+      .auth-sub {
+        text-align: center;
+        font-size: 13.5px;
+        color: #6f8189;
+        margin: 0 0 28px;
+      }
+
+      .field {
+        margin-bottom: 18px;
+      }
+
+      .field label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: #6fd9c4;
+        margin-bottom: 7px;
+      }
+
+      .input-wrap {
+        position: relative;
+      }
+
+      .field input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid #00ccff33;
+        background: #0d1417;
+        color: #e6f2f2;
+        font-size: 14.5px;
+        font-family: inherit;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .field input::placeholder {
+        color: #4d5b60;
+      }
+
+      .field input:focus {
+        outline: none;
+        border-color: #00ffaa;
+        box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.15);
+      }
+
+      .field input.err {
+        border-color: #ff5d6c;
+        box-shadow: 0 0 0 3px rgba(255, 93, 108, 0.12);
+      }
+
+      .error-msg {
+        display: none;
+        font-size: 12px;
+        color: #ff8d97;
+        margin-top: 6px;
+      }
+
+      .error-msg.show {
+        display: block;
+      }
+
+      .toggle-pw {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6f8189;
+        cursor: pointer;
+        font-size: 12px;
+        letter-spacing: 0.3px;
+        padding: 4px 6px;
+      }
+
+      .toggle-pw:hover {
+        color: #00ffaa;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .row-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: -6px 0 22px;
+        font-size: 13px;
+      }
+
+      .remember {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #9aa6ae;
+      }
+
+      .remember input {
+        accent-color: #00ffaa;
+        width: 15px;
+        height: 15px;
+      }
+
+      .link-teal {
+        color: #00ccff;
+        text-decoration: none;
+      }
+
+      .link-teal:hover {
+        color: #00ffaa;
+        text-decoration: underline;
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 13px;
+        border-radius: 8px;
+        border: none;
+        background: linear-gradient(90deg, #00ffaa, #00ccff);
+        color: #04131a;
+        font-weight: 700;
+        font-size: 14.5px;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.2s ease;
+        position: relative;
+      }
+
+      .submit-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 18px rgba(0, 255, 170, 0.25);
+      }
+      .submit-btn:active {
+        transform: scale(0.99);
+      }
+      .submit-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(4, 19, 26, 0.35);
+        border-top-color: #04131a;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+        vertical-align: -2px;
+        margin-right: 8px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .divider-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 24px 0 20px;
+        color: #45545a;
+        font-size: 12px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+
+      .divider-row::before,
+      .divider-row::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #00ccff33, transparent);
+      }
+
+      .social-row {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 26px;
+      }
+
+      .social-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #00ccff33;
+        background: #0d1417;
+        color: #cfe3e3;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          border-color 0.2s ease,
+          color 0.2s ease;
+      }
+
+      .chatbot-panel {
+        display: none;
+        margin-top: 28px;
+        padding: 22px;
+        border: 1px solid #00ccff33;
+        border-radius: 14px;
+        background: #081116;
+      }
+
+      .chatbot-panel.show {
+        display: block;
+      }
+
+      .chatbot-header {
+        color: #00ffaa;
+        font-size: 18px;
+        margin-bottom: 16px;
+      }
+
+      .chatbot-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 220px;
+        overflow-y: auto;
+        padding: 12px;
+        border: 1px solid #00ccff22;
+        border-radius: 10px;
+        margin-bottom: 16px;
+        background: #071116;
+      }
+
+      .message {
+        padding: 10px 12px;
+        border-radius: 12px;
+        max-width: 100%;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .message.bot {
+        background: rgba(0, 255, 170, 0.08);
+        border: 1px solid rgba(0, 255, 170, 0.15);
+        color: #d2fff0;
+        align-self: flex-start;
+      }
+
+      .message.user {
+        background: rgba(0, 204, 255, 0.12);
+        border: 1px solid rgba(0, 204, 255, 0.2);
+        color: #daf9ff;
+        align-self: flex-end;
+      }
+
+      #loginChatInput {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 8px;
+        border: 1px solid #00ccff33;
+        background: #0d1417;
+        color: #e6f2f2;
+        margin-bottom: 12px;
+        font-size: 14px;
+      }
+
+      #loginChatInput:focus {
+        outline: none;
+        border-color: #00ffaa;
+        box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.12);
+      }
+
+      .social-btn:hover {
+        border-color: #00ffaa;
+        color: #00ffaa;
+      }
+      .social-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .switch-line {
+        text-align: center;
+        font-size: 13.5px;
+        color: #6f8189;
+      }
+
+      .status-banner {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        background: rgba(0, 255, 170, 0.08);
+        border: 1px solid #00ffaa55;
+        color: #a6ffe6;
+        border-radius: 8px;
+        padding: 12px 14px;
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
+
+      .status-banner.show {
+        display: flex;
+      }
+
+      .status-banner.error {
+        background: rgba(255, 93, 108, 0.08);
+        border-color: #ff5d6c55;
+        color: #ffc2c8;
+      }
+
+      footer.mini-footer {
+        text-align: center;
+        padding: 18px 20px 30px;
+        font-size: 12px;
+        color: #445157;
+      }
+
+      footer.mini-footer a {
+        color: #6fd9c4;
+        text-decoration: none;
+      }
+      footer.mini-footer a:hover {
+        color: #00ffaa;
+      }
+
+      @media (max-width: 480px) {
+        .auth-card {
+          padding: 30px 22px 26px;
+        }
+        .social-row {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="#" class="brand" aria-label="Liora home">
+        LI
+        <span class="sun-wrap"><span class="sun-orb"></span></span>
+        RA
+      </a>
+    </header>
+
+    <main class="auth-shell">
+      <div class="auth-card">
+        <h1>Welcome back</h1>
+        <p class="auth-sub">Sign in to keep tracking your energy, your way.</p>
+
+        <div
+          class="status-banner"
+          id="statusBanner"
+          role="status"
+          aria-live="polite"
+        ></div>
+
+        <form id="loginForm" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <div class="input-wrap">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+            </div>
+            <div class="error-msg" id="emailError">
+              Enter a valid email address.
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="toggle-pw"
+                id="togglePw"
+                aria-label="Show password"
+              >
+                Show
+              </button>
+            </div>
+            <div class="error-msg" id="passwordError">Enter your password.</div>
+          </div>
+
+          <div class="row-between">
+            <label class="remember">
+              <input type="checkbox" id="remember" name="remember" />
+              Remember me
+            </label>
+            <a href="#" class="link-teal" id="forgotLink">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">
+            Sign in
+          </button>
+        </form>
+
+        <div class="divider-row">or continue with</div>
+
+        <div class="social-row">
+          <button type="button" class="social-btn" id="appleBtn">
+            <svg viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M16.36 1.4c.11 1.04-.31 2.06-.93 2.82-.63.77-1.65 1.36-2.66 1.28-.13-1 .36-2.06.96-2.78.65-.77 1.75-1.35 2.63-1.32zM20.5 17.2c-.32.75-.7 1.46-1.16 2.1-.62.9-1.13 1.52-1.9 2.5-.75.95-1.63 1.9-2.76 1.92-1 .02-1.32-.65-2.75-.65-1.44 0-1.8.63-2.75.67-1.08.04-1.9-.97-2.66-1.9-1.83-2.2-3.24-6.2-1.35-9.1.94-1.44 2.6-2.35 4.4-2.38 1.05-.02 2.04.72 2.68.72.64 0 1.83-.9 3.09-.76.52.02 2 .21 2.94 1.58-.08.05-1.76 1.05-1.74 3.12.02 2.48 2.16 3.3 2.19 3.32z"
+              />
+            </svg>
+            Continue with Apple
+          </button>
+          <button type="button" class="social-btn" id="googleBtn">
+            <svg viewBox="0 0 24 24">
+              <path
+                fill="#EA4335"
+                d="M12 11.85v2.9h5.24c-.23 1.3-1.2 3.82-5.24 3.82-3.15 0-5.72-2.6-5.72-5.8s2.57-5.8 5.72-5.8c1.8 0 3.02.76 3.71 1.4l2.52-2.43C17.63 4.2 15.09 3 12 3 7.03 3 3 7.03 3 12s4.03 9 9 9c5.2 0 8.6-3.63 8.6-8.76 0-.6-.07-1.06-.16-1.52H12z"
+              />
+            </svg>
+            Continue with Google
+          </button>
+        </div>
+
+        <div class="chatbot-panel hidden" id="loginChatbot">
+          <div class="chatbot-header">💬 Liora Chat</div>
+          <div class="chatbot-messages" id="loginChatMessages">
+            <div class="message bot">
+              Welcome back! Ask me about your solar plan, savings, or
+              installation.
+            </div>
+          </div>
+          <form id="loginChatForm">
+            <input
+              id="loginChatInput"
+              placeholder="Type your question..."
+              autocomplete="off"
+            />
+            <button type="submit" class="submit-btn">Send</button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer class="mini-footer">
+      &copy; 2026 Liora Energy · <a href="#">Privacy</a> · <a href="#">Terms</a>
+    </footer>
+
+    <script src="login.js"></script>
+  </body>
+</html>

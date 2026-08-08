@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solar Recommendation | Liora</title>
+    <link rel="stylesheet" href="/calculator.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/"
+        ><span>LI</span><span class="sun" aria-hidden="true"></span
+        ><span>RA</span></a
+      ><span class="brand-note">AI Powered. Human Inspired.</span
+      ><a class="back-link" href="/calculator">← Edit energy needs</a>
+    </header>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">Solar Calculator</p>
+        <h1>Your solar system recommendation</h1>
+        <p>
+          Based on the energy needs you entered, here is a suggested starting
+          system.
+        </p>
+        <div class="stepper">
+          <span>1 <b>Energy needs</b></span
+          ><i></i><span class="active">2 <b>Solar system</b></span>
+        </div>
+      </section>
+      <section class="calculator-grid">
+        <section class="panel needs-panel">
+          <div class="panel-title">
+            <span>1</span>
+            <div>
+              <h2>Confirm your solar setup</h2>
+              <p>Adjust these options to suit your roof and preferences.</p>
+            </div>
+          </div>
+          <div class="usage-card">
+            <small>Your daily energy need</small
+            ><strong><output id="dailyNeed">—</output> <em>kWh</em></strong>
+            <p id="cityLabel">Based on your appliance choices</p>
+          </div>
+          <div class="field-grid solar-fields">
+            <label
+              >Solar panel type<select id="panelType">
+                <option value="1">550 W Mono PERC</option>
+                <option value="1.06">540 W TOPCon</option>
+                <option value=".95">450 W Mono PERC</option>
+              </select></label
+            >
+            <label
+              >Inverter type<select id="inverter">
+                <option value="1">On-grid inverter</option>
+                <option value="1.22">Hybrid inverter</option>
+              </select></label
+            >
+            <label
+              >Mounting type<select id="mount">
+                <option>RCC rooftop</option>
+                <option>Metal rooftop</option>
+                <option>Ground mount</option>
+              </select></label
+            >
+            <label
+              >Battery<select id="battery">
+                <option value="0">No battery</option>
+                <option value="65000">5 kWh battery</option>
+                <option value="115000">10 kWh battery</option>
+              </select></label
+            >
+            <label
+              >Available roof area (sq ft)<input
+                id="roofArea"
+                type="number"
+                min="0"
+                value="300"
+            /></label>
+            <label
+              >System size (kW)<input
+                id="sizeInput"
+                type="number"
+                min="1"
+                step="0.5"
+            /></label>
+          </div>
+          <div class="tip">
+            ⌂
+            <span
+              ><b>Roof check</b><br />Your system will need approximately
+              <strong id="areaNeeded">—</strong> sq ft of shade-free roof
+              space.</span
+            >
+          </div>
+        </section>
+        <aside class="results-column">
+          <section class="panel recommendation-panel">
+            <div class="panel-title">
+              <span>2</span>
+              <div>
+                <h2>Recommended system</h2>
+                <p>Your personalised solar estimate.</p>
+              </div>
+            </div>
+            <div class="recommendation">
+              <p>Recommended solar system</p>
+              <strong
+                ><output id="recommendedSize">—</output> <em>kW</em></strong
+              ><span class="solar-icon">☀</span>
+            </div>
+            <div class="bill-comparison">
+              <label
+                >Current monthly electricity bill
+                <input
+                  id="monthlyBill"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value="450"
+                />
+              </label>
+              <p class="comparison-output">
+                Estimated bill after solar: <strong id="newBill">—</strong>
+              </p>
+            </div>
+            <dl>
+              <div>
+                <dt>Daily generation</dt>
+                <dd id="generation">—</dd>
+              </div>
+              <div>
+                <dt>Monthly generation</dt>
+                <dd id="monthlyGeneration">—</dd>
+              </div>
+              <div>
+                <dt>Monthly saving</dt>
+                <dd id="saving">—</dd>
+              </div>
+              <div>
+                <dt>Estimated installed cost</dt>
+                <dd id="cost">—</dd>
+              </div>
+              <div>
+                <dt>Estimated payback</dt>
+                <dd id="payback">—</dd>
+              </div>
+            </dl>
+            <button class="primary-button" id="savePlan" type="button">
+              Save my solar plan →
+            </button>
+            <p class="fine-print">
+              These values are a planning estimate, not a final engineering
+              quote.
+            </p>
+          </section>
+          <section class="panel history-panel">
+            <div class="panel-title">
+              <span>3</span>
+              <div>
+                <h2>Plan history</h2>
+                <p>Compare past solar plans and how your bill changes.</p>
+              </div>
+            </div>
+            <div id="historyList" class="history-list">
+              <div class="history-empty">
+                No history yet. Save a plan to compare bills after installation.
+              </div>
+            </div>
+            <button type="button" class="text-button" id="clearHistory">
+              Clear history
+            </button>
+          </section>
+        </aside>
+      </section>
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div class="chatbot-widget" id="chatbotWidget">
+      <button class="chatbot-toggle" id="chatbotToggle" type="button">
+        Chat with Liora
+      </button>
+      <div class="chatbot-panel" id="chatbotPanel" hidden>
+        <div class="chatbot-header">Solar assistant</div>
+        <div class="chatbot-messages" id="chatMessages">
+          <div class="message bot">
+            Hi! Ask me about your solar plan, bill savings, or installation.
+          </div>
+        </div>
+        <form id="chatForm">
+          <input
+            id="chatInput"
+            placeholder="Ask a question..."
+            autocomplete="off"
+          />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+
+    <script src="/solar-recommendation.js"></script>
+  </body>
+</html>
