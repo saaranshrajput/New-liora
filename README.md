@@ -2,6 +2,14 @@
 
 Liora is a FastAPI-based solar recommendation application with static frontend pages.
 
+## Project layout
+
+- `frontend/pages/` contains the HTML pages.
+- `frontend/css/` contains the stylesheets.
+- `frontend/js/` contains the browser scripts.
+- `app/` contains the FastAPI backend, database code, schemas, and utilities.
+- Deployment files such as `Procfile`, `Dockerfile`, and `requirements.txt` remain at the project root.
+
 ## Deployment
 
 This repo is set up for permanent hosting with a provider like Render, Railway, or Heroku.
@@ -39,6 +47,20 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 - The app currently uses SQLite at `liora.db`.
 - For a more reliable production deployment, switch to PostgreSQL or MySQL.
 - Do not commit `venv/` or `.env` to GitHub.
+
+### AI chatbot setup
+
+The chatbot uses an OpenAI-compatible chat API. Keep the key on the server and set it as an environment variable:
+
+```powershell
+$env:OPENAI_API_KEY = "your-api-key"
+```
+
+Optional settings are `OPENAI_MODEL` (defaults to `gpt-4o-mini`) and `OPENAI_API_URL` (defaults to OpenAI's chat completions endpoint). Configure the same variables in your hosting provider before publishing. The browser never receives the API key.
+
+### Contact form setup
+
+The Contact us form sends messages through Resend. Set `RESEND_API_KEY` on the server before publishing. You can optionally set `CONTACT_FROM_EMAIL` to a verified Resend sender address; otherwise the development sender is used.
 
 ## Making changes after publishing
 

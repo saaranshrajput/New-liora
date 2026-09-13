@@ -43,7 +43,6 @@
       <div class="box" id="authBox">
         <h2 id="authHeading">📝 Sign Up</h2>
         <div id="signupWrapper">
-          <!-- Signup form: has id="signupForm" and includes a password input -->
           <form id="signupForm">
             <input type="text" name="name" placeholder="Full Name" required />
             <input type="email" name="email" placeholder="Email" required />
@@ -60,25 +59,30 @@
             ></p>
           </form>
         </div>
-        <div id="chatbotPanel" class="chatbot-panel hidden">
-          <h2>💬 Liora Chat</h2>
-          <p>
-            Welcome! Ask me about your solar plan, bill savings, or
-            installation.
-          </p>
-          <div class="chat-messages" id="chatMessages">
-            <div class="message bot">
-              Hi there! I can help you compare future bills and your solar plan.
+        <div id="dashboard" class="dashboard hidden">
+          <p class="dashboard-kicker">Your solar journey starts here</p>
+          <p id="dashboardIntro" class="dashboard-intro"></p>
+          <a class="dashboard-primary" href="/calculator"
+            >Start solar assessment</a
+          >
+          <div class="dashboard-stats">
+            <div>
+              <strong id="dashboardUsage">Not added</strong
+              ><span>Daily usage</span>
+            </div>
+            <div>
+              <strong id="dashboardSystem">Not calculated</strong
+              ><span>Recommended size</span>
+            </div>
+            <div>
+              <strong id="dashboardSavings">Not calculated</strong
+              ><span>Monthly savings</span>
             </div>
           </div>
-          <form id="chatForm">
-            <input
-              id="chatInput"
-              placeholder="Type your question..."
-              autocomplete="off"
-            />
-            <button type="submit">Send</button>
-          </form>
+          <div class="dashboard-actions">
+            <a href="/calculator">Open calculator</a>
+            <a href="/solar-recommendation">View recommendation</a>
+          </div>
         </div>
       </div>
     </section>
@@ -125,6 +129,51 @@
       <!-- Your app content here -->
     </main>
 
+    <div class="chatbot-widget home-chatbot" id="chatbotWidget">
+      <button
+        class="chatbot-toggle"
+        id="chatbotToggle"
+        type="button"
+        aria-label="Open Liora Solar Assistant"
+      >
+        <span aria-hidden="true">✦</span> Ask Liora
+      </button>
+      <div class="chatbot-panel" id="chatbotPanel" hidden>
+        <div class="chatbot-header">
+          <div>
+            <strong>Liora Solar Assistant</strong
+            ><span>AI guidance for your solar plan</span>
+          </div>
+          <button
+            class="chatbot-close"
+            id="chatbotClose"
+            type="button"
+            aria-label="Close chat"
+          >
+            ×
+          </button>
+        </div>
+        <div class="chat-suggestions" aria-label="Suggested questions">
+          <button type="button">How much can I save?</button>
+          <button type="button">What system size do I need?</button>
+          <button type="button">Do I need a battery?</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="message bot">
+            Hi! Ask me about your solar plan, savings, or installation.
+          </div>
+        </div>
+        <form id="chatForm">
+          <input
+            id="chatInput"
+            placeholder="Ask a solar question..."
+            autocomplete="off"
+          />
+          <button type="submit" aria-label="Send message">➤</button>
+        </form>
+      </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="liora-footer">
       <div class="footer-top">
@@ -139,7 +188,7 @@
           <a href="#about">About Liora</a>
           <a href="#how">How it works</a>
           <a href="/calculator">Solar calculator</a>
-          <a href="mailto:hello@liora.energy">Contact us</a>
+          <a href="#contact" id="contactLink">Contact us</a>
         </div>
       </div>
       <div class="footer-bottom">
@@ -148,6 +197,40 @@
       </div>
     </footer>
 
-    <script src="script.js"></script>
+    <div class="contact-modal" id="contactModal" hidden>
+      <div
+        class="contact-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="contactTitle"
+      >
+        <button
+          class="contact-close"
+          id="contactClose"
+          type="button"
+          aria-label="Close contact form"
+        >
+          ×
+        </button>
+        <p class="dashboard-kicker">Get in touch</p>
+        <h2 id="contactTitle">Contact Liora</h2>
+        <p>Send us a message and we will reply by email.</p>
+        <form id="contactForm">
+          <input name="name" placeholder="Your name" required />
+          <input name="email" type="email" placeholder="Your email" required />
+          <textarea
+            name="message"
+            placeholder="How can we help?"
+            rows="5"
+            required
+          ></textarea>
+          <button type="submit">Send message</button>
+          <p id="contactStatus" role="status"></p>
+        </form>
+      </div>
+    </div>
+
+    <script src="/chat.js"></script>
+    <script src="/script.js"></script>
   </body>
 </html>

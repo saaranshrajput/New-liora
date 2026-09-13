@@ -9,10 +9,6 @@
   const togglePw = document.getElementById("togglePw");
   const dividerRow = document.querySelector(".divider-row");
   const socialRow = document.querySelector(".social-row");
-  const loginChatbot = document.getElementById("loginChatbot");
-  const loginChatMessages = document.getElementById("loginChatMessages");
-  const loginChatForm = document.getElementById("loginChatForm");
-  const loginChatInput = document.getElementById("loginChatInput");
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const apiBase =
     window.location.origin && window.location.origin !== "null"
@@ -25,29 +21,6 @@
 
   function setSavedUser(user) {
     localStorage.setItem("lioraUser", JSON.stringify(user));
-  }
-
-  function appendChatMessage(text, type = "bot") {
-    const message = document.createElement("div");
-    message.className = `message ${type}`;
-    message.textContent = text;
-    loginChatMessages.appendChild(message);
-    loginChatMessages.scrollTop = loginChatMessages.scrollHeight;
-  }
-
-  function showChatbot(user) {
-    form.classList.add("hidden");
-    if (dividerRow) dividerRow.classList.add("hidden");
-    if (socialRow) socialRow.classList.add("hidden");
-    loginChatbot.classList.add("show");
-    appendChatMessage(`You are signed in as ${user.email}.`);
-  }
-
-  function initPage() {
-    const storedUser = getSavedUser();
-    if (storedUser) {
-      showChatbot(storedUser);
-    }
   }
 
   function setStatus(message, type) {
@@ -136,9 +109,12 @@
         return;
       }
 
-      const user = { email: emailInput.value.trim() };
+      const user = {
+        name: data.name,
+        email: data.email || emailInput.value.trim(),
+      };
       setSavedUser(user);
-      showChatbot(user);
+      window.location.href = "/";
     } catch (error) {
       setStatus(
         `Could not reach the server. Start the API and try again. (${error.message})`,
@@ -160,19 +136,4 @@
       setStatus("This option is not available yet.", "error");
     });
   });
-
-  loginChatForm.addEventListener("submit", function (event) {
-    event.preventDefault();
-    const text = loginChatInput.value.trim();
-    if (!text) return;
-    appendChatMessage(text, "user");
-    loginChatInput.value = "";
-    setTimeout(() => {
-      appendChatMessage(
-        "Thanks for your question! For now, I can help you understand your solar estimate and billing outlook. Save a plan to generate your PDF.",
-      );
-    }, 300);
-  });
-
-  initPage();
 })();
