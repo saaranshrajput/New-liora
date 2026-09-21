@@ -7,8 +7,23 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
+
+def _truncate_password(value):
+    """Bcrypt only accepts up to 72 bytes; truncate safely before hashing."""
+    if value is None:
+        return ""
+    if isinstance(value, bytes):
+        value = value[:72]
+        return value.decode("utf-8", errors="ignore")
+    encoded = value.encode("utf-8")
+    if len(encoded) > 72:
+        return encoded[:72].decode("utf-8", errors="ignore")
+    return value
+
+
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    normalized = _truncate_password(password)
+    return pwd_context.hash(normalized)
 
 
 def verify_password(plain_password, hashed_password):
@@ -18,16 +33,10 @@ def verify_password(plain_password, hashed_password):
         # passwords. This permits a successful login to migrate them below.
         return hmac.compare_digest(plain_password, hashed_password)
 
-    if isinstance(plain_password, str):
-        plain_password = plain_password.encode("utf-8")
-    if len(plain_password) > 72:
-        plain_password = plain_password[:72]
+    normalized_password = _truncate_password(plain_password)
 
     try:
-        return pwd_context.verify(
-            plain_password.decode("utf-8", errors="ignore"),
-            hashed_password,
-        )
+        return pwd_context.verify(normalized_password, hashed_password)
     except ValueError:
         return False
 
