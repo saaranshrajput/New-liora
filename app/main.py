@@ -27,13 +27,34 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Allows the project HTML pages to call the API while developing locally.
+
+def get_allowed_origins() -> list[str]:
+    """Support both local development and public deployment origins."""
+    configured = os.getenv("ALLOWED_ORIGINS", "")
+    origins = [origin.strip() for origin in configured.split(",") if origin.strip()]
+
+    for env_name in ("PUBLIC_URL", "FRONTEND_URL", "API_URL"):
+        value = os.getenv(env_name)
+        if value:
+            origins.append(value.rstrip("/"))
+
+    defaults = [
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "null",
+    ]
+    origins.extend(defaults)
+
+    return list(dict.fromkeys(origins))
+
+
+# Allows the app to accept requests from the public site as well as local development.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000", "null"],
+    allow_origins=get_allowed_origins(),
     allow_credentials=False,
-    allow_methods=["POST"],
-    allow_headers=["Content-Type"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent

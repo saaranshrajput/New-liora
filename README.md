@@ -41,6 +41,7 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 6. Set `Health Check Path` to `/api`.
 
 7. Optionally add a `DATABASE_URL` environment variable if you provision a Postgres database; otherwise the app uses `sqlite:///./liora.db` by default.
+8. Set `PUBLIC_URL` or `ALLOWED_ORIGINS` to your live frontend origin if the API and frontend are hosted on different domains (for example, `https://liora.example.com`). When omitted, the app still allows local development origins.
 
 ## Production notes
 
