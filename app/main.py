@@ -87,8 +87,17 @@ def home_script():
     return FileResponse(FRONTEND_JS / "script.js", media_type="text/javascript")
 
 
-@app.get("/calculator", include_in_schema=False)
+@app.get("/talk-to-liora", include_in_schema=False)
+def talk_to_liora_page():
+    return FileResponse(FRONTEND_PAGES / "talk-to-liora.html")
 
+
+@app.get("/chatbot", include_in_schema=False)
+def chatbot_page():
+    return FileResponse(FRONTEND_PAGES / "talk-to-liora.html")
+
+
+@app.get("/calculator", include_in_schema=False)
 def calculator_page():
     return FileResponse(FRONTEND_PAGES / "calculator.html")
 

@@ -27,6 +27,10 @@
 
   if (toggle && panel) {
     toggle.addEventListener("click", () => {
+      if (window.location.pathname !== "/talk-to-liora") {
+        window.location.href = "/talk-to-liora";
+        return;
+      }
       panel.hidden = !panel.hidden;
       if (!panel.hidden) input.focus();
     });
