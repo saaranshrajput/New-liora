@@ -10,7 +10,6 @@ from fastapi.responses import FileResponse, Response
 from sqlalchemy.orm import Session
 
 from app.database.db import Base, engine, get_db
-from app.database import models
 from app.schema.user import UserCreate
 from app.crud.user import create_user, get_user_by_email
 from app.utils.hashing import hash_password, needs_password_rehash, verify_password
