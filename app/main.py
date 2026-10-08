@@ -297,15 +297,20 @@ def chat(request: ChatRequest):
 @app.post("/contact")
 def contact(request: ContactRequest):
     api_key = os.getenv("RESEND_API_KEY")
-    if not api_key:
+    sender = os.getenv("CONTACT_FROM_EMAIL")
+    recipient = os.getenv("CONTACT_TO_EMAIL")
+    if not api_key or not sender or not recipient:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Contact email is not configured yet. Set RESEND_API_KEY on the server.",
+            detail=(
+                "Contact email is not configured. Set RESEND_API_KEY, "
+                "CONTACT_FROM_EMAIL, and CONTACT_TO_EMAIL in Render."
+            ),
         )
 
     payload = json.dumps({
-        "from": os.getenv("CONTACT_FROM_EMAIL", "Liora website <onboarding@resend.dev>"),
-        "to": [os.getenv("CONTACT_TO_EMAIL", "ompurnima2930@gmail.com")],
+        "from": sender,
+        "to": [recipient],
         "reply_to": request.email,
         "subject": f"Liora contact message from {request.name}",
         "text": f"Name: {request.name}\nEmail: {request.email}\n\n{request.message}",
@@ -337,10 +342,15 @@ def contact(request: ContactRequest):
             detail = "Email service rejected its API key. Check RESEND_API_KEY in Render."
         elif provider_message:
             detail = f"Resend rejected the message: {provider_message}"
-        elif error.code in {403, 422}:
+        elif error.code == 403:
             detail = (
-                "Email service rejected the sender or recipient. Verify your sending domain "
-                "and CONTACT_FROM_EMAIL in Resend."
+                "Resend blocked this email. Verify the CONTACT_FROM_EMAIL sending domain; "
+                "in Resend test mode, CONTACT_TO_EMAIL must be your Resend account email."
+            )
+        elif error.code == 422:
+            detail = (
+                "Resend rejected the email fields. Check that CONTACT_FROM_EMAIL is a "
+                "verified sender and CONTACT_TO_EMAIL is a valid recipient."
             )
         else:
             detail = f"Email service rejected the message (HTTP {error.code})."

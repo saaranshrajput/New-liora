@@ -307,6 +307,7 @@ def test_contact_form_sends_to_configured_inbox(client, monkeypatch):
 def test_contact_form_reports_resend_sender_rejection(client, monkeypatch):
     monkeypatch.setenv("RESEND_API_KEY", "test-resend-key")
     monkeypatch.setenv("CONTACT_FROM_EMAIL", "Liora <unverified@example.com>")
+    monkeypatch.setenv("CONTACT_TO_EMAIL", "recipient@example.com")
     rejection = HTTPError(
         "https://api.resend.com/emails",
         403,
@@ -327,3 +328,50 @@ def test_contact_form_reports_resend_sender_rejection(client, monkeypatch):
 
     assert response.status_code == 502
     assert response.json()["detail"] == "Resend rejected the message: sender not verified"
+
+
+def test_contact_form_requires_explicit_sender_and_recipient(client, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-resend-key")
+    monkeypatch.setenv("CONTACT_FROM_EMAIL", "Liora <hello@example.com>")
+    monkeypatch.delenv("CONTACT_TO_EMAIL", raising=False)
+    send_email = Mock(side_effect=AssertionError("Do not send without a configured recipient."))
+    monkeypatch.setattr("app.main.urlopen", send_email)
+
+    response = client.post(
+        "/contact",
+        json={
+            "name": "Solar Customer",
+            "email": "customer@example.com",
+            "message": "Please contact me.",
+        },
+    )
+
+    assert response.status_code == 503
+    assert "CONTACT_TO_EMAIL" in response.json()["detail"]
+    send_email.assert_not_called()
+
+
+def test_contact_form_explains_resend_test_mode_recipient_restriction(client, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-resend-key")
+    monkeypatch.setenv("CONTACT_FROM_EMAIL", "Liora <onboarding@resend.dev>")
+    monkeypatch.setenv("CONTACT_TO_EMAIL", "recipient@example.com")
+    rejection = HTTPError(
+        "https://api.resend.com/emails",
+        403,
+        "Forbidden",
+        {},
+        BytesIO(b"{}"),
+    )
+    monkeypatch.setattr("app.main.urlopen", Mock(side_effect=rejection))
+
+    response = client.post(
+        "/contact",
+        json={
+            "name": "Solar Customer",
+            "email": "customer@example.com",
+            "message": "Please contact me.",
+        },
+    )
+
+    assert response.status_code == 502
+    assert "CONTACT_TO_EMAIL must be your Resend account email" in response.json()["detail"]
