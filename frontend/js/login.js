@@ -13,11 +13,15 @@
   const socialDivider = document.getElementById("socialDivider");
   const socialRow = document.getElementById("socialRow");
   const appleBtn = document.getElementById("appleBtn");
+  const googleFallbackBtn = document.getElementById("googleFallbackBtn");
   const googleButtonContainer = document.getElementById("googleButtonContainer");
   const authHeading = document.querySelector(".auth-card h1");
   const authSub = document.querySelector(".auth-sub");
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const resetToken = new URLSearchParams(window.location.hash.slice(1)).get("reset_token");
+  let passwordResetEnabled = false;
+  let appleConfigured = false;
+  let googleConfigured = false;
   const apiBase =
     window.location.origin && window.location.origin !== "null"
       ? window.location.origin
@@ -52,12 +56,11 @@
   function setMode(mode) {
     const isLogin = mode === "login";
     const isForgot = mode === "forgot";
-    const socialEnabled = socialRow.dataset.enabled === "true";
     form.classList.toggle("hidden", !isLogin);
     forgotForm.classList.toggle("hidden", !isForgot);
     resetForm.classList.toggle("hidden", mode !== "reset");
-    socialDivider.classList.toggle("hidden", !isLogin || !socialEnabled);
-    socialRow.classList.toggle("hidden", !isLogin || !socialEnabled);
+    socialDivider.classList.toggle("hidden", !isLogin);
+    socialRow.classList.toggle("hidden", !isLogin);
     authHeading.textContent =
       mode === "reset" ? "Choose a new password" :
       isForgot ? "Reset your password" : "Welcome back";
@@ -104,11 +107,16 @@
   async function configureSocialSignIn() {
     try {
       const response = await fetch(`${apiBase}/auth/config`);
-      if (!response.ok) return;
+      if (!response.ok) {
+        setMode(resetToken ? "reset" : "login");
+        return;
+      }
       const config = await response.json();
+      passwordResetEnabled = config.password_reset_enabled === true;
+      googleConfigured = Boolean(config.google_client_id);
+      appleConfigured = Boolean(config.apple_client_id);
 
-      if (config.google_client_id) {
-        googleButtonContainer.classList.remove("hidden");
+      if (googleConfigured) {
         try {
           await loadScript("https://accounts.google.com/gsi/client");
           const nonce = createNonce();
@@ -128,20 +136,19 @@
             shape: "rectangular",
             width: Math.max(120, document.querySelector(".auth-card").clientWidth - 60),
           });
-          socialRow.dataset.enabled = "true";
+          googleFallbackBtn.classList.add("hidden");
+          googleButtonContainer.classList.remove("hidden");
         } catch (error) {
           googleButtonContainer.classList.add("hidden");
           setStatus(error.message, "error");
         }
       }
 
-      if (config.apple_client_id) {
-        appleBtn.classList.remove("hidden");
+      if (appleConfigured) {
         try {
           await loadScript(
             "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js",
           );
-          socialRow.dataset.enabled = "true";
           appleBtn.addEventListener("click", async () => {
             const nonce = createNonce();
             try {
@@ -164,12 +171,6 @@
         }
       }
 
-      if (
-        !googleButtonContainer.classList.contains("hidden") ||
-        !appleBtn.classList.contains("hidden")
-      ) {
-        socialRow.dataset.enabled = "true";
-      }
       setMode(resetToken ? "reset" : "login");
     } catch {
       setMode(resetToken ? "reset" : "login");
@@ -271,6 +272,30 @@
   document.getElementById("forgotLink").addEventListener("click", (event) => {
     event.preventDefault();
     setMode("forgot");
+    if (!passwordResetEnabled) {
+      setStatus(
+        "Password recovery is not set up on this site yet. Please contact the site administrator.",
+        "error",
+      );
+    }
+  });
+
+  googleFallbackBtn.addEventListener("click", () => {
+    setStatus(
+      googleConfigured
+        ? "Google sign-in is loading. Please try again in a moment."
+        : "Google sign-in is not set up on this site yet. Please contact the site administrator.",
+      "error",
+    );
+  });
+
+  appleBtn.addEventListener("click", () => {
+    if (!appleConfigured) {
+      setStatus(
+        "Apple sign-in is not set up on this site yet. Please contact the site administrator.",
+        "error",
+      );
+    }
   });
 
   document.getElementById("backToLoginFromForgot").addEventListener("click", (event) => {
@@ -300,7 +325,11 @@
       });
       const data = await readJsonResponse(response);
       if (!response.ok) {
-        setStatus(data?.detail || `Could not request a reset (HTTP ${response.status}).`, "error");
+        const message =
+          response.status === 503
+            ? "Password recovery is not set up on this site yet. Please contact the site administrator."
+            : data?.detail || `Could not request a reset (HTTP ${response.status}).`;
+        setStatus(message, "error");
         return;
       }
       setStatus(data.message, "success");

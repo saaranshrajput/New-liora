@@ -216,3 +216,40 @@ def test_oauth_is_disabled_without_provider_configuration(client, monkeypatch):
     )
 
     assert response.status_code == 503
+
+
+def test_auth_page_keeps_social_options_visible_without_provider_keys(client):
+    response = client.get("/login-page")
+
+    assert response.status_code == 200
+    assert "Continue with Apple" in response.text
+    assert "Continue with Google" in response.text
+
+
+def test_auth_config_reports_unconfigured_integrations(client, monkeypatch):
+    monkeypatch.delenv("GOOGLE_CLIENT_ID", raising=False)
+    monkeypatch.delenv("APPLE_CLIENT_ID", raising=False)
+    monkeypatch.delenv("RESEND_API_KEY", raising=False)
+    monkeypatch.delenv("PUBLIC_URL", raising=False)
+    monkeypatch.delenv("RENDER_EXTERNAL_URL", raising=False)
+
+    response = client.get("/auth/config")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "google_client_id": None,
+        "apple_client_id": None,
+        "password_reset_enabled": False,
+    }
+
+
+def test_forgot_password_omits_internal_environment_variable_name(client, monkeypatch):
+    monkeypatch.delenv("RESEND_API_KEY", raising=False)
+
+    response = client.post(
+        "/forgot-password",
+        json={"email": "auth-check@example.com"},
+    )
+
+    assert response.status_code == 503
+    assert "RESEND_API_KEY" not in response.json()["detail"]

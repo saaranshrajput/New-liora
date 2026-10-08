@@ -388,6 +388,10 @@ def auth_config():
     return {
         "google_client_id": os.getenv("GOOGLE_CLIENT_ID"),
         "apple_client_id": os.getenv("APPLE_CLIENT_ID"),
+        "password_reset_enabled": bool(
+            os.getenv("RESEND_API_KEY")
+            and (os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL"))
+        ),
     }
 
 
@@ -432,13 +436,13 @@ def forgot_password(
     if not os.getenv("RESEND_API_KEY"):
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Password reset email is not configured. Set RESEND_API_KEY on the server.",
+            detail="Password recovery is not configured for this site.",
         )
     public_url = os.getenv("PUBLIC_URL") or os.getenv("RENDER_EXTERNAL_URL")
     if not public_url:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Password reset links are not configured. Set PUBLIC_URL on the server.",
+            detail="Password recovery is not configured for this site.",
         )
 
     user = get_user_by_email(db, str(payload.email))
