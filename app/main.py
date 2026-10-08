@@ -447,7 +447,12 @@ def forgot_password(
 
     user = get_user_by_email(db, str(payload.email))
     if user is None:
-        return {"message": "If that email is registered, a reset link has been sent."}
+        return {
+            "message": (
+                "If an account exists for this email, a reset link will arrive shortly. "
+                "Check your spam folder too."
+            )
+        }
 
     now = _utc_now()
     existing_token = db.query(PasswordResetToken).filter(
@@ -458,7 +463,12 @@ def forgot_password(
         and existing_token.expires_at > now
         and existing_token.created_at > now - timedelta(minutes=1)
     ):
-        return {"message": "If that email is registered, a reset link has been sent."}
+        return {
+            "message": (
+                "If an account exists for this email, a reset link will arrive shortly. "
+                "Check your spam folder too."
+            )
+        }
 
     raw_token = secrets.token_urlsafe(32)
     token_hash = hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
@@ -483,7 +493,12 @@ def forgot_password(
         db.commit()
         raise
 
-    return {"message": "If that email is registered, a reset link has been sent."}
+    return {
+        "message": (
+            "If an account exists for this email, a reset link will arrive shortly. "
+            "Check your spam folder too."
+        )
+    }
 
 
 @app.post("/reset-password")

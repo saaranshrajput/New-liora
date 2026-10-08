@@ -109,7 +109,8 @@ def test_password_reset_email_link_updates_password(client, monkeypatch):
     reset_request = client.post("/forgot-password", json={"email": email})
     assert reset_request.status_code == 200
     assert reset_request.json()["message"] == (
-        "If that email is registered, a reset link has been sent."
+        "If an account exists for this email, a reset link will arrive shortly. "
+        "Check your spam folder too."
     )
 
     reset_url = re.search(
@@ -253,3 +254,22 @@ def test_forgot_password_omits_internal_environment_variable_name(client, monkey
 
     assert response.status_code == 503
     assert "RESEND_API_KEY" not in response.json()["detail"]
+
+
+def test_forgot_password_does_not_claim_delivery_for_unknown_email(client, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-resend-key")
+    monkeypatch.setenv("PUBLIC_URL", "https://liora.example.com")
+    send_email = Mock(side_effect=AssertionError("No account means no reset email."))
+    monkeypatch.setattr("app.main.urlopen", send_email)
+
+    response = client.post(
+        "/forgot-password",
+        json={"email": "not-registered@example.com"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == (
+        "If an account exists for this email, a reset link will arrive shortly. "
+        "Check your spam folder too."
+    )
+    send_email.assert_not_called()
