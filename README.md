@@ -63,6 +63,17 @@ Optional settings are `OPENAI_MODEL` (defaults to `gpt-4o-mini`) and `OPENAI_API
 
 The Contact us form sends messages through Resend. Set `RESEND_API_KEY` on the server before publishing. You can optionally set `CONTACT_FROM_EMAIL` to a verified Resend sender address; otherwise the development sender is used.
 
+### Account recovery and social sign-in
+
+Password recovery sends a single-use link that expires after 30 minutes. It uses the same Resend integration as the contact form, so configure `RESEND_API_KEY` and a verified `CONTACT_FROM_EMAIL` in Render. Set `PUBLIC_URL` to the service's public HTTPS URL (for example, `https://liora.example.com`) so reset links point to the correct site.
+
+Google and Apple sign-in are enabled only when their client IDs are configured:
+
+- `GOOGLE_CLIENT_ID`: a Google OAuth web client ID. Add the Render site origin to its authorized JavaScript origins.
+- `APPLE_CLIENT_ID`: the Apple Services ID. Configure the website domain and the `/login-page` return URL in Apple Developer.
+
+The client IDs are public identifiers, not private keys. Do not add provider secrets to frontend code.
+
 ## Making changes after publishing
 
 Yes — you can make changes after publishing.

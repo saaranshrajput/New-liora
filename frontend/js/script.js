@@ -19,7 +19,11 @@ async function readJsonResponse(response) {
 }
 
 function getSavedUser() {
-  return JSON.parse(localStorage.getItem("lioraUser") || "null");
+  return JSON.parse(
+    localStorage.getItem("lioraUser") ||
+      sessionStorage.getItem("lioraUser") ||
+      "null",
+  );
 }
 
 function setSavedUser(user) {
