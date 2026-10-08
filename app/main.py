@@ -321,9 +321,22 @@ def contact(request: ContactRequest):
         with urlopen(provider_request, timeout=15):
             pass
     except HTTPError as error:
-        logger.warning("Resend rejected contact email with HTTP %s", error.code)
+        try:
+            provider_error = json.loads(error.read().decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            provider_error = {}
+        provider_message = provider_error.get("message")
+        if not isinstance(provider_message, str):
+            provider_message = ""
+        logger.warning(
+            "Resend rejected contact email with HTTP %s: %s",
+            error.code,
+            provider_message or error.reason,
+        )
         if error.code == 401:
             detail = "Email service rejected its API key. Check RESEND_API_KEY in Render."
+        elif provider_message:
+            detail = f"Resend rejected the message: {provider_message}"
         elif error.code in {403, 422}:
             detail = (
                 "Email service rejected the sender or recipient. Verify your sending domain "

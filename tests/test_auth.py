@@ -326,4 +326,4 @@ def test_contact_form_reports_resend_sender_rejection(client, monkeypatch):
     )
 
     assert response.status_code == 502
-    assert "Verify your sending domain" in response.json()["detail"]
+    assert response.json()["detail"] == "Resend rejected the message: sender not verified"
