@@ -158,10 +158,14 @@ contactForm.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(Object.fromEntries(formData)),
     });
-    const data = await response.json();
-    if (!response.ok)
-      throw new Error(data.detail || "Message could not be sent.");
-    contactStatus.textContent = data.message;
+    const data = await readJsonResponse(response);
+    if (!response.ok) {
+      throw new Error(
+        data?.detail || `Message could not be sent (HTTP ${response.status}).`,
+      );
+    }
+    contactStatus.textContent =
+      data?.message || "Your message was accepted by the email service.";
     contactForm.reset();
   } catch (error) {
     contactStatus.textContent = error.message;

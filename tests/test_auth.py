@@ -1,8 +1,10 @@
 import json
 import re
 import base64
+from io import BytesIO
 from time import time
 from unittest.mock import Mock
+from urllib.error import HTTPError
 
 import pytest
 from fastapi.testclient import TestClient
@@ -273,3 +275,55 @@ def test_forgot_password_does_not_claim_delivery_for_unknown_email(client, monke
         "Check your spam folder too."
     )
     send_email.assert_not_called()
+
+
+def test_contact_form_sends_to_configured_inbox(client, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-resend-key")
+    monkeypatch.setenv("CONTACT_FROM_EMAIL", "Liora <hello@example.com>")
+    monkeypatch.setenv("CONTACT_TO_EMAIL", "inbox@example.com")
+    provider_response = Mock()
+    provider_response.__enter__ = Mock(return_value=provider_response)
+    provider_response.__exit__ = Mock(return_value=False)
+    send_email = Mock(return_value=provider_response)
+    monkeypatch.setattr("app.main.urlopen", send_email)
+
+    response = client.post(
+        "/contact",
+        json={
+            "name": "Solar Customer",
+            "email": "customer@example.com",
+            "message": "Please contact me about a solar plan.",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "Your message was accepted by the email service."
+    sent_payload = json.loads(send_email.call_args.args[0].data.decode("utf-8"))
+    assert sent_payload["from"] == "Liora <hello@example.com>"
+    assert sent_payload["to"] == ["inbox@example.com"]
+    assert sent_payload["reply_to"] == "customer@example.com"
+
+
+def test_contact_form_reports_resend_sender_rejection(client, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-resend-key")
+    monkeypatch.setenv("CONTACT_FROM_EMAIL", "Liora <unverified@example.com>")
+    rejection = HTTPError(
+        "https://api.resend.com/emails",
+        403,
+        "Forbidden",
+        {},
+        BytesIO(b'{"message":"sender not verified"}'),
+    )
+    monkeypatch.setattr("app.main.urlopen", Mock(side_effect=rejection))
+
+    response = client.post(
+        "/contact",
+        json={
+            "name": "Solar Customer",
+            "email": "customer@example.com",
+            "message": "Please contact me.",
+        },
+    )
+
+    assert response.status_code == 502
+    assert "Verify your sending domain" in response.json()["detail"]

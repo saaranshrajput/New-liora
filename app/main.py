@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import hashlib
 import json
+import logging
 import os
 import secrets
 from pathlib import Path
@@ -30,6 +31,7 @@ app = FastAPI(
     title="Liora API",
     version="1.0.0"
 )
+logger = logging.getLogger(__name__)
 
 
 def get_allowed_origins() -> list[str]:
@@ -303,7 +305,7 @@ def contact(request: ContactRequest):
 
     payload = json.dumps({
         "from": os.getenv("CONTACT_FROM_EMAIL", "Liora website <onboarding@resend.dev>"),
-        "to": ["ompurnima2930@gmail.com"],
+        "to": [os.getenv("CONTACT_TO_EMAIL", "ompurnima2930@gmail.com")],
         "reply_to": request.email,
         "subject": f"Liora contact message from {request.name}",
         "text": f"Name: {request.name}\nEmail: {request.email}\n\n{request.message}",
@@ -318,13 +320,29 @@ def contact(request: ContactRequest):
     try:
         with urlopen(provider_request, timeout=15):
             pass
-    except (HTTPError, URLError, TimeoutError) as error:
+    except HTTPError as error:
+        logger.warning("Resend rejected contact email with HTTP %s", error.code)
+        if error.code == 401:
+            detail = "Email service rejected its API key. Check RESEND_API_KEY in Render."
+        elif error.code in {403, 422}:
+            detail = (
+                "Email service rejected the sender or recipient. Verify your sending domain "
+                "and CONTACT_FROM_EMAIL in Resend."
+            )
+        else:
+            detail = f"Email service rejected the message (HTTP {error.code})."
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=detail,
+        ) from error
+    except (URLError, TimeoutError) as error:
+        logger.warning("Contact email request could not reach Resend: %s", error)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="The message could not be sent. Please try again later.",
         ) from error
 
-    return {"message": "Your message was sent successfully."}
+    return {"message": "Your message was accepted by the email service."}
 
 @app.post("/register")
 def register(user: UserCreate, db: Session = Depends(get_db)):

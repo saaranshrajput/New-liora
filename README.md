@@ -61,7 +61,7 @@ Optional settings are `OPENAI_MODEL` (defaults to `gpt-4o-mini`) and `OPENAI_API
 
 ### Contact form setup
 
-The Contact us form sends messages through Resend. Set `RESEND_API_KEY` on the server before publishing. You can optionally set `CONTACT_FROM_EMAIL` to a verified Resend sender address; otherwise the development sender is used.
+The Contact us form sends messages through Resend. Set `RESEND_API_KEY` on the server and set `CONTACT_FROM_EMAIL` to a sender on a domain verified with Resend. Set `CONTACT_TO_EMAIL` to the inbox that should receive contact messages; if omitted it defaults to the current project recipient. Resend's `onboarding@resend.dev` sender is for testing and is restricted; use a verified domain for production delivery.
 
 ### Account recovery and social sign-in
 
