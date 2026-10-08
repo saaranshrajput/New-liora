@@ -330,9 +330,15 @@ def contact(request: ContactRequest):
             provider_error = json.loads(error.read().decode("utf-8"))
         except (UnicodeDecodeError, json.JSONDecodeError):
             provider_error = {}
-        provider_message = provider_error.get("message")
-        if not isinstance(provider_message, str):
-            provider_message = ""
+        provider_message = ""
+        if isinstance(provider_error, dict):
+            provider_message = provider_error.get("message", "")
+            if not isinstance(provider_message, str):
+                provider_message = ""
+            if not provider_message and provider_error.get("errors"):
+                provider_message = json.dumps(provider_error["errors"])
+        elif isinstance(provider_error, list):
+            provider_message = json.dumps(provider_error)
         logger.warning(
             "Resend rejected contact email with HTTP %s: %s",
             error.code,
@@ -343,17 +349,11 @@ def contact(request: ContactRequest):
         elif provider_message:
             detail = f"Resend rejected the message: {provider_message}"
         elif error.code == 403:
-            detail = (
-                "Resend blocked this email. Verify the CONTACT_FROM_EMAIL sending domain; "
-                "in Resend test mode, CONTACT_TO_EMAIL must be your Resend account email."
-            )
+            detail = "Resend rejected the message with HTTP 403 Forbidden and provided no reason."
         elif error.code == 422:
-            detail = (
-                "Resend rejected the email fields. Check that CONTACT_FROM_EMAIL is a "
-                "verified sender and CONTACT_TO_EMAIL is a valid recipient."
-            )
+            detail = "Resend rejected the email fields with HTTP 422 and provided no reason."
         else:
-            detail = f"Email service rejected the message (HTTP {error.code})."
+            detail = f"Resend rejected the message with HTTP {error.code}: {error.reason}."
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail=detail,

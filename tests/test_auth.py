@@ -374,4 +374,34 @@ def test_contact_form_explains_resend_test_mode_recipient_restriction(client, mo
     )
 
     assert response.status_code == 502
-    assert "CONTACT_TO_EMAIL must be your Resend account email" in response.json()["detail"]
+    assert response.json()["detail"] == (
+        "Resend rejected the message with HTTP 403 Forbidden and provided no reason."
+    )
+
+
+def test_contact_form_handles_resend_errors_that_are_not_objects(client, monkeypatch):
+    monkeypatch.setenv("RESEND_API_KEY", "test-resend-key")
+    monkeypatch.setenv("CONTACT_FROM_EMAIL", "Liora <hello@example.com>")
+    monkeypatch.setenv("CONTACT_TO_EMAIL", "recipient@example.com")
+    rejection = HTTPError(
+        "https://api.resend.com/emails",
+        422,
+        "Unprocessable Entity",
+        {},
+        BytesIO(b'["invalid sender configuration"]'),
+    )
+    monkeypatch.setattr("app.main.urlopen", Mock(side_effect=rejection))
+
+    response = client.post(
+        "/contact",
+        json={
+            "name": "Solar Customer",
+            "email": "customer@example.com",
+            "message": "Please contact me.",
+        },
+    )
+
+    assert response.status_code == 502
+    assert response.json()["detail"] == (
+        'Resend rejected the message: ["invalid sender configuration"]'
+    )
