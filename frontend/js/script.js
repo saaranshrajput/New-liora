@@ -10,6 +10,14 @@ const contactClose = document.getElementById("contactClose");
 const contactForm = document.getElementById("contactForm");
 const contactStatus = document.getElementById("contactStatus");
 
+async function readJsonResponse(response) {
+  try {
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
 function getSavedUser() {
   return JSON.parse(localStorage.getItem("lioraUser") || "null");
 }
@@ -75,7 +83,7 @@ signupForm.addEventListener("submit", async function (event) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
     });
-    const data = await response.json();
+    const data = await readJsonResponse(response);
 
     if (!response.ok) {
       if (response.status === 409) {
@@ -84,11 +92,11 @@ signupForm.addEventListener("submit", async function (event) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
-        const loginData = await loginResponse.json();
+        const loginData = await readJsonResponse(loginResponse);
         if (loginResponse.ok) {
           finishSignIn({
-            name: loginData.name || name,
-            email: loginData.email || email,
+            name: loginData?.name || name,
+            email: loginData?.email || email,
           });
           return;
         }
@@ -96,7 +104,14 @@ signupForm.addEventListener("submit", async function (event) {
           "This email is already registered. Use the Login link with your existing password.";
         return;
       }
-      signupMsg.textContent = data.detail || "Unable to create your account.";
+      signupMsg.textContent =
+        data?.detail || `Unable to create your account (HTTP ${response.status}).`;
+      return;
+    }
+
+    if (!data) {
+      signupMsg.textContent =
+        "The server returned an unreadable response. Your account may have been created; try signing in.";
       return;
     }
 
