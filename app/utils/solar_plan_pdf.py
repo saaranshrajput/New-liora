@@ -98,15 +98,15 @@ def create_solar_plan_pdf(plan) -> bytes:
         lines.append(f"0.0 0.8 0.65 RG 316 {y - 9} m 547 {y - 9} l S")
         y -= max(35, row_lines * 12 + 22)
 
-    rect(42, 276, 511, 115, "0.032 0.125 0.101")
-    text(58, 363, 15, "What this means for you", "0.65 1.0 0.90")
-    text(58, 340, 10, "Your system is sized to cover a large part of your household's daytime energy use.")
-    text(58, 320, 10, "A final site survey will confirm roof shade, structure and your exact local tariff.")
-    text(58, 300, 10, "Liora recommends comparing final installer quotes before making a purchase decision.")
+    rect(42, 248, 511, 100, "0.032 0.125 0.101")
+    text(58, 320, 15, "What this means for you", "0.65 1.0 0.90")
+    text(58, 297, 10, "Your system is sized to cover a large part of your household's daytime energy use.")
+    text(58, 277, 10, "A final site survey will confirm roof shade, structure and your exact local tariff.")
+    text(58, 257, 10, "Liora recommends comparing final installer quotes before making a purchase decision.")
 
-    text(42, 234, 15, "Next steps", "0.0 1.0 0.78")
+    text(42, 215, 15, "Next steps", "0.0 1.0 0.78")
     steps = ["1. Check that your roof has enough shade-free space.", "2. Request a site survey from a qualified solar installer.", "3. Compare warranty, generation and installation proposals."]
-    y = 208
+    y = 188
     for step in steps:
         text(52, y, 10, step, "0.82 0.92 0.91")
         y -= 21
