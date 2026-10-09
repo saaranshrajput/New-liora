@@ -11,6 +11,7 @@ from urllib.request import Request as URLRequest, urlopen
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
+from dotenv import load_dotenv
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
@@ -32,6 +33,8 @@ app = FastAPI(
     version="1.0.0"
 )
 logger = logging.getLogger(__name__)
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(PROJECT_ROOT / ".env")
 
 
 def get_allowed_origins() -> list[str]:
@@ -63,7 +66,6 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
 FRONTEND_ROOT = PROJECT_ROOT / "frontend"
 FRONTEND_PAGES = FRONTEND_ROOT / "pages"
 FRONTEND_CSS = FRONTEND_ROOT / "css"
@@ -174,7 +176,7 @@ def home():
     }
 
 
-@app.get("/", include_in_schema=False)
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 def frontend():
     """Serve the Liora frontend from the same origin as the API."""
     return FileResponse(FRONTEND_PAGES / "liora.html")
@@ -243,7 +245,7 @@ def chat_script():
 
 @app.post("/chat")
 def chat(request: ChatRequest):
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
     if not api_key:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -266,13 +268,14 @@ def chat(request: ChatRequest):
     messages.append({"role": "user", "content": request.message})
 
     payload = json.dumps({
-        "model": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        "model": os.getenv("OPENAI_MODEL", "").strip() or "gpt-4o-mini",
         "messages": messages,
         "temperature": 0.4,
         "max_tokens": 500,
     }).encode("utf-8")
     provider_request = URLRequest(
-        os.getenv("OPENAI_API_URL", "https://api.openai.com/v1/chat/completions"),
+        os.getenv("OPENAI_API_URL", "").strip()
+        or "https://api.openai.com/v1/chat/completions",
         data=payload,
         headers={
             "Authorization": f"Bearer {api_key}",
@@ -285,10 +288,22 @@ def chat(request: ChatRequest):
         with urlopen(provider_request, timeout=30) as response:
             result = json.loads(response.read().decode("utf-8"))
         answer = result["choices"][0]["message"]["content"].strip()
-    except (HTTPError, URLError, TimeoutError, KeyError, IndexError, json.JSONDecodeError) as error:
-        detail = "The AI assistant is temporarily unavailable. Please try again."
-        if isinstance(error, HTTPError) and error.code in {401, 403}:
+    except HTTPError as error:
+        if error.code in {401, 403}:
             detail = "The AI provider rejected the server credentials. Check OPENAI_API_KEY."
+        elif error.code == 404:
+            detail = "The AI provider could not find the configured model or API endpoint."
+        elif error.code == 429:
+            detail = "The AI provider rate limit or usage quota has been reached."
+        elif error.code == 400:
+            detail = "The AI provider rejected the request. Check OPENAI_MODEL and provider settings."
+        else:
+            detail = "The AI assistant is temporarily unavailable. Please try again."
+        logger.warning("AI provider returned HTTP %s.", error.code)
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=detail) from error
+    except (URLError, TimeoutError, KeyError, IndexError, TypeError, AttributeError, json.JSONDecodeError) as error:
+        logger.warning("AI provider request failed: %s.", type(error).__name__)
+        detail = "The AI assistant is temporarily unavailable. Please try again."
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=detail) from error
 
     return {"answer": answer}

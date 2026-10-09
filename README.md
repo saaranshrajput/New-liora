@@ -51,13 +51,13 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
 ### AI chatbot setup
 
-The chatbot uses an OpenAI-compatible chat API. Keep the key on the server and set it as an environment variable:
+The chatbot uses an OpenAI-compatible chat API. Keep the key on the server. For local development, the app loads a project-root `.env` file (without overriding environment variables already set by the host):
 
 ```powershell
-$env:OPENAI_API_KEY = "your-api-key"
+OPENAI_API_KEY=your-api-key
 ```
 
-Optional settings are `OPENAI_MODEL` (defaults to `gpt-4o-mini`) and `OPENAI_API_URL` (defaults to OpenAI's chat completions endpoint). Configure the same variables in your hosting provider before publishing. The browser never receives the API key.
+Optional settings are `OPENAI_MODEL` (defaults to `gpt-4o-mini`) and `OPENAI_API_URL` (defaults to `https://api.openai.com/v1/chat/completions`). Set these as environment variables in your hosting provider before publishing. The browser never receives the API key.
 
 ### Contact form setup
 
