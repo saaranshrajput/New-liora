@@ -22,7 +22,6 @@ from app.crud.user import create_user, get_user_by_email
 from app.utils.hashing import hash_password, needs_password_rehash, verify_password
 from app.schema.user import UserLogin
 from app.schema.solar import SolarPlanRequest
-from app.schema.chat import ChatRequest
 from app.schema.contact import ContactRequest
 from app.utils.solar_plan_pdf import create_solar_plan_pdf
 
@@ -192,16 +191,6 @@ def home_script():
     return FileResponse(FRONTEND_JS / "script.js", media_type="text/javascript")
 
 
-@app.get("/talk-to-liora", include_in_schema=False)
-def talk_to_liora_page():
-    return FileResponse(FRONTEND_PAGES / "talk-to-liora.html")
-
-
-@app.get("/chatbot", include_in_schema=False)
-def chatbot_page():
-    return FileResponse(FRONTEND_PAGES / "talk-to-liora.html")
-
-
 @app.get("/calculator", include_in_schema=False)
 def calculator_page():
     return FileResponse(FRONTEND_PAGES / "calculator.html")
@@ -236,77 +225,6 @@ def login_page():
 @app.get("/login.js", include_in_schema=False)
 def login_script():
     return FileResponse(FRONTEND_JS / "login.js", media_type="text/javascript")
-
-
-@app.get("/chat.js", include_in_schema=False)
-def chat_script():
-    return FileResponse(FRONTEND_JS / "chat.js", media_type="text/javascript")
-
-
-@app.post("/chat")
-def chat(request: ChatRequest):
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    if not api_key:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="AI chat is not configured. Set OPENAI_API_KEY on the server.",
-        )
-
-    system_prompt = (
-        "You are Liora, a helpful solar energy assistant. Answer clearly and briefly. "
-        "Help users understand solar sizing, generation, savings, costs, batteries, "
-        "and installation considerations. Use the user's provided plan context when "
-        "available. Do not guarantee exact savings, prices, approvals, or payback; "
-        "explain that local installers should confirm estimates. If asked about an "
-        "unrelated topic, politely steer the conversation back to solar."
-    )
-    messages = [{"role": "system", "content": system_prompt}]
-    if request.context:
-        context = "; ".join(f"{key}: {value}" for key, value in request.context.items())
-        messages.append({"role": "system", "content": f"Current user context: {context}"})
-    messages.extend(message.model_dump() for message in request.history[-20:])
-    messages.append({"role": "user", "content": request.message})
-
-    payload = json.dumps({
-        "model": os.getenv("OPENAI_MODEL", "").strip() or "gpt-4o-mini",
-        "messages": messages,
-        "temperature": 0.4,
-        "max_tokens": 500,
-    }).encode("utf-8")
-    provider_request = URLRequest(
-        os.getenv("OPENAI_API_URL", "").strip()
-        or "https://api.openai.com/v1/chat/completions",
-        data=payload,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json",
-        },
-        method="POST",
-    )
-
-    try:
-        with urlopen(provider_request, timeout=30) as response:
-            result = json.loads(response.read().decode("utf-8"))
-        answer = result["choices"][0]["message"]["content"].strip()
-    except HTTPError as error:
-        if error.code in {401, 403}:
-            detail = "The AI provider rejected the server credentials. Check OPENAI_API_KEY."
-        elif error.code == 404:
-            detail = "The AI provider could not find the configured model or API endpoint."
-        elif error.code == 429:
-            detail = "The AI provider rate limit or usage quota has been reached."
-        elif error.code == 400:
-            detail = "The AI provider rejected the request. Check OPENAI_MODEL and provider settings."
-        else:
-            detail = "The AI assistant is temporarily unavailable. Please try again."
-        logger.warning("AI provider returned HTTP %s.", error.code)
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=detail) from error
-    except (URLError, TimeoutError, KeyError, IndexError, TypeError, AttributeError, json.JSONDecodeError) as error:
-        logger.warning("AI provider request failed: %s.", type(error).__name__)
-        detail = "The AI assistant is temporarily unavailable. Please try again."
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=detail) from error
-
-    return {"answer": answer}
 
 
 @app.post("/contact")

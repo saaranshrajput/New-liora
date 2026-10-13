@@ -23,7 +23,6 @@
           <li><a href="#features">Features</a></li>
           <li><a href="#how">How it Works</a></li>
           <li><a href="/calculator">Your Calculator</a></li>
-          <li><a href="/talk-to-liora">Talk to Liora</a></li>
           <li><a href="/login-page">Login</a></li>
         </ul>
       </nav>
@@ -129,52 +128,6 @@
     <main>
       <!-- Your app content here -->
     </main>
-
-    <div class="chatbot-widget home-chatbot" id="chatbotWidget">
-      <button
-        class="chatbot-toggle"
-        id="chatbotToggle"
-        type="button"
-        aria-label="Open Liora Solar Assistant"
-      >
-        <span aria-hidden="true">✦</span> Ask Liora
-      </button>
-      <div class="chatbot-panel" id="chatbotPanel" hidden>
-        <div class="chatbot-header">
-          <div>
-            <strong>Liora Solar Assistant</strong
-            ><span>AI guidance for your solar plan</span>
-          </div>
-          <button
-            class="chatbot-close"
-            id="chatbotClose"
-            type="button"
-            aria-label="Close chat"
-          >
-            ×
-          </button>
-        </div>
-        <div class="chat-suggestions" aria-label="Suggested questions">
-          <button type="button">How much can I save?</button>
-          <button type="button">What system size do I need?</button>
-          <button type="button">Do I need a battery?</button>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="message bot">
-            Hi! Ask me about your solar plan, savings, or installation.
-          </div>
-        </div>
-        <form id="chatForm">
-          <input
-            id="chatInput"
-            placeholder="Ask a solar question..."
-            autocomplete="off"
-          />
-          <button type="submit" aria-label="Send message">➤</button>
-        </form>
-      </div>
-    </div>
-
     <!-- FOOTER -->
     <footer class="liora-footer">
       <div class="footer-top">
@@ -231,7 +184,6 @@
       </div>
     </div>
 
-    <script src="/chat.js"></script>
     <script src="/script.js"></script>
   </body>
 </html>

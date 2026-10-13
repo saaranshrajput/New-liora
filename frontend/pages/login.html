@@ -384,77 +384,6 @@
           color 0.2s ease;
       }
 
-      .chatbot-panel {
-        display: none;
-        margin-top: 28px;
-        padding: 22px;
-        border: 1px solid #00ccff33;
-        border-radius: 14px;
-        background: #081116;
-      }
-
-      .chatbot-panel.show {
-        display: block;
-      }
-
-      .chatbot-header {
-        color: #00ffaa;
-        font-size: 18px;
-        margin-bottom: 16px;
-      }
-
-      .chatbot-messages {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        max-height: 220px;
-        overflow-y: auto;
-        padding: 12px;
-        border: 1px solid #00ccff22;
-        border-radius: 10px;
-        margin-bottom: 16px;
-        background: #071116;
-      }
-
-      .message {
-        padding: 10px 12px;
-        border-radius: 12px;
-        max-width: 100%;
-        font-size: 14px;
-        line-height: 1.45;
-      }
-
-      .message.bot {
-        background: rgba(0, 255, 170, 0.08);
-        border: 1px solid rgba(0, 255, 170, 0.15);
-        color: #d2fff0;
-        align-self: flex-start;
-      }
-
-      .message.user {
-        background: rgba(0, 204, 255, 0.12);
-        border: 1px solid rgba(0, 204, 255, 0.2);
-        color: #daf9ff;
-        align-self: flex-end;
-      }
-
-      #loginChatInput {
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 8px;
-        border: 1px solid #00ccff33;
-        background: #0d1417;
-        color: #e6f2f2;
-        margin-bottom: 12px;
-        font-size: 14px;
-      }
-
-      #loginChatInput:focus {
-        outline: none;
-        border-color: #00ffaa;
-        box-shadow: 0 0 0 3px rgba(0, 255, 170, 0.12);
-      }
-
       .social-btn:hover {
         border-color: #00ffaa;
         color: #00ffaa;
@@ -648,15 +577,6 @@
         <div class="divider-row" id="socialDivider">or continue with</div>
 
         <div class="social-row" id="socialRow">
-          <button type="button" class="social-btn" id="appleBtn">
-            <svg viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M16.36 1.4c.11 1.04-.31 2.06-.93 2.82-.63.77-1.65 1.36-2.66 1.28-.13-1 .36-2.06.96-2.78.65-.77 1.75-1.35 2.63-1.32zM20.5 17.2c-.32.75-.7 1.46-1.16 2.1-.62.9-1.13 1.52-1.9 2.5-.75.95-1.63 1.9-2.76 1.92-1 .02-1.32-.65-2.75-.65-1.44 0-1.8.63-2.75.67-1.08.04-1.9-.97-2.66-1.9-1.83-2.2-3.24-6.2-1.35-9.1.94-1.44 2.6-2.35 4.4-2.38 1.05-.02 2.04.72 2.68.72.64 0 1.83-.9 3.09-.76.52.02 2 .21 2.94 1.58-.08.05-1.76 1.05-1.74 3.12.02 2.48 2.16 3.3 2.19 3.32z"
-              />
-            </svg>
-            Continue with Apple
-          </button>
           <button type="button" class="social-btn" id="googleFallbackBtn">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path

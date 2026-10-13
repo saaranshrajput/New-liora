@@ -49,16 +49,6 @@ uvicorn app.main:app --host 0.0.0.0 --port $PORT
 - For a more reliable production deployment, switch to PostgreSQL or MySQL.
 - Do not commit `venv/` or `.env` to GitHub.
 
-### AI chatbot setup
-
-The chatbot uses an OpenAI-compatible chat API. Keep the key on the server. For local development, the app loads a project-root `.env` file (without overriding environment variables already set by the host):
-
-```powershell
-OPENAI_API_KEY=your-api-key
-```
-
-Optional settings are `OPENAI_MODEL` (defaults to `gpt-4o-mini`) and `OPENAI_API_URL` (defaults to `https://api.openai.com/v1/chat/completions`). Set these as environment variables in your hosting provider before publishing. The browser never receives the API key.
-
 ### Contact form setup
 
 The Contact us form sends messages through Resend. All three variables are required: `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, and `CONTACT_TO_EMAIL`. Set `CONTACT_FROM_EMAIL` to a sender on a domain verified with Resend and `CONTACT_TO_EMAIL` to the inbox that should receive contact messages. Resend's `onboarding@resend.dev` sender is restricted to testing and may only send to the Resend account's verified email; use a verified domain for production delivery.

@@ -140,12 +140,11 @@ def test_password_reset_email_link_updates_password(client, monkeypatch):
     ).status_code == 400
 
 
-def test_solar_recommendation_page_has_no_chat_widget(client):
+def test_solar_recommendation_page_serves_recommendation(client):
     response = client.get("/solar-recommendation")
 
     assert response.status_code == 200
-    assert "Chat with Liora" not in response.text
-    assert 'src="/chat.js"' not in response.text
+    assert "Your solar system recommendation" in response.text
 
 
 def test_google_signin_verifies_token_and_creates_account(client, monkeypatch):
